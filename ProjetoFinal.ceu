@@ -1,6 +1,6 @@
 	^["@/pico/pico.ceu"]
 
-;;
+
 pico-state-set-title("pico-Ceu: Projeto Final")
 pico-state-set-size-pixel([1,1])
 pico-state-set-size([600,400])
