@@ -1,0 +1,95 @@
+	^["@/pico/pico.ceu"]
+
+
+pico-state-set-title("pico-Ceu: Projeto Final")
+pico-state-set-size-pixel([1,1])
+pico-state-set-size([600,400])
+pico-state-set-grid(false)
+pico-state-set-auto(false)
+val WIN :XY = pico-state-get-size()
+
+task tubo (pos:XY) {
+	var tamanhoTubo = random-next()%150
+	ifs {
+		(tamanhoTubo > 100) and (tamanhoTubo < 120) -> set tamanhoTubo = tamanhoTubo + 40
+		(tamanhoTubo >  70) and (tamanhoTubo < 100) -> set tamanhoTubo = tamanhoTubo + 70
+		(tamanhoTubo <= 20) -> set tamanhoTubo = tamanhoTubo + 130
+        (tamanhoTubo > 20) and (tamanhoTubo < 70) -> set tamanhoTubo = tamanhoTubo + 120
+	}
+    par {
+        every :Pico.Frame {
+            set pos.x = pos.x - 1
+            if(pos.x < -315){
+				set pos.x = 415
+				set tamanhoTubo = random-next()%160
+				ifs {
+					(tamanhoTubo >= 100) and (tamanhoTubo < 120) -> set tamanhoTubo = tamanhoTubo + 25
+					(tamanhoTubo >  70) and (tamanhoTubo < 100) -> set tamanhoTubo = tamanhoTubo + 65
+					(tamanhoTubo <= 20) -> set tamanhoTubo = tamanhoTubo + 115
+					(tamanhoTubo > 20) and (tamanhoTubo < 70) -> set tamanhoTubo = tamanhoTubo + 105
+				}
+			}
+        }
+    } with {
+        every :Pico.Draw {
+        	pico-state-set-image-crop ([[148,10],[30,160]])
+			pico-output-draw-image([pos.x,tamanhoTubo], "gameAssets.png")
+        	pico-state-set-image-crop ([[178,0],[30,160]])
+			pico-output-draw-image([pos.x,tamanhoTubo-240], "gameAssets.png")
+        }
+    }
+}
+
+task fundoTela (pos:XY) {
+    par {
+        every :Pico.Frame {
+            set pos.x = pos.x - 2
+            if(pos.x < -375){
+				set pos.x = 465
+			}
+        }
+    } with {
+        every :Pico.Draw {
+        	pico-state-set-image-crop ([[0,0],[150,600]])
+			pico-output-draw-image([pos.x,pos.y], "gameAssets.png")
+        }
+    }
+}
+
+task piso (pos:XY) {
+    par {
+        every :Pico.Frame {
+            set pos.x = pos.x - 1
+            if(pos.x < -375){
+				set pos.x = 465
+			}
+        }
+    } with {
+        every :Pico.Draw {
+        	pico-state-set-image-crop ([[220,0],[160,60]])
+			pico-output-draw-image([pos.x,pos.y], "gameAssets.png")
+        }
+    }
+}
+
+spawn fundoTela ([-225,0])
+spawn fundoTela ([-85,0])
+spawn fundoTela ([55,0])
+spawn fundoTela ([195,0])
+spawn fundoTela ([335,0])
+spawn fundoTela ([475,0])
+;;spawn fundoTela ([465,0])
+spawn tubo([0,120])
+spawn tubo([-100,120])
+spawn tubo([100,140])	
+spawn tubo([200,170])
+spawn tubo([300,120])
+spawn tubo([400,160])
+spawn tubo([500,160])
+spawn piso([-225,-170])
+spawn piso([-85,-170])
+spawn piso([55,-170])
+spawn piso([195,-170])
+spawn piso([335,-170])
+spawn piso([465,-170])
+pico-loop()
