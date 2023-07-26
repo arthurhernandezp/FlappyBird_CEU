@@ -8,8 +8,11 @@ pico-state-set-grid(false)
 pico-state-set-auto(false)
 val WIN :XY = pico-state-get-size()
 
+data :Bird = [alive,rect:Rect]
+
 task tubo (pos:XY) {
 	var tamanhoTubo = random-next()%150
+	var vel = 1
 	ifs {
 		(tamanhoTubo > 100) and (tamanhoTubo < 120) -> set tamanhoTubo = tamanhoTubo + 40
 		(tamanhoTubo >  70) and (tamanhoTubo < 100) -> set tamanhoTubo = tamanhoTubo + 70
@@ -18,7 +21,7 @@ task tubo (pos:XY) {
 	}
     par {
         every :Pico.Frame {
-            set pos.x = pos.x - 1
+            set pos.x = pos.x - vel
             if(pos.x < -315){
 				set pos.x = 415
 				set tamanhoTubo = random-next()%160
@@ -37,6 +40,14 @@ task tubo (pos:XY) {
         	pico-state-set-image-crop ([[178,0],[30,160]])
 			pico-output-draw-image([pos.x,tamanhoTubo-240], "gameAssets.png")
         }
+    } with{
+    	loop{
+			await 5000:ms
+			if(vel <= 10){
+				 set vel = vel + 1
+			}
+		}
+    
     }
 }
 
@@ -52,6 +63,92 @@ task fundoTela (pos:XY) {
         every :Pico.Draw {
         	pico-state-set-image-crop ([[0,0],[150,600]])
 			pico-output-draw-image([pos.x,pos.y], "gameAssets.png")
+        }
+    }
+}
+
+task Bird (pos:XY){
+	var dy = 0
+	var recorteY = 180;
+	
+	spawn{
+		par{
+			every :Pico.Key.Dn, (evt.key == :Key-up){
+				;;set pos.y = pos.y - 2
+		        if(pos.y < -140){
+					set pos.y = 0
+				}
+			}
+		}
+		with {
+            every :Pico.Key.Dn, (evt.key == :Key-W) {
+                set pos.y = pos.y + 2
+		        if(pos.y < -140){
+					set pos.y = 0
+				}
+            }
+        }
+	}
+    par {
+    	loop{
+			awaiting :Pico.Key.Up, (evt.key == :Key-W) {
+				every :Pico.Frame {
+					set pos.y = pos.y - 3
+					set dy = dy + 1
+					if(dy > 3){
+						set recorteY = recorteY + 25
+						set dy = 0
+						if(recorteY >= 255) {
+							set recorteY = 180
+						}
+					}	
+				} 
+			}
+			awaiting 500:ms{
+				every :Pico.Frame {
+					set pos.y = pos.y + 3
+					set dy = dy + 1
+					if(dy > 3){
+						set recorteY = recorteY + 25
+						set dy = 0
+						if(recorteY >= 255) {
+							set recorteY = 180
+						}
+					}	
+				} 
+			
+			}  
+		}     
+    } with {
+        every :Pico.Draw {
+        		pico-state-set-image-crop ([[380,recorteY],[20,30]])
+        		pico-output-draw-image([pos.x,pos.y], "gameAssets.png")
+        }
+    }
+}
+
+task pontuacao (pos:XY){
+	var dy = 0
+	var recorteY = 180;
+    par {
+        every :Pico.Frame {
+        	set pos.y = pos.y - 2
+            if(pos.y < -140){
+				set pos.y = 0
+			}
+			set dy = dy + 1
+			if(dy > 3){
+				set recorteY = recorteY + 25
+				set dy = 0
+				if(recorteY >= 255) {
+					set recorteY = 180
+				}
+			}
+        }
+    } with {
+        every :Pico.Draw {
+        		pico-state-set-image-crop ([[380,recorteY],[20,30]])
+        		pico-output-draw-image([pos.x,pos.y], "gameAssets.png")
         }
     }
 }
@@ -78,18 +175,23 @@ spawn fundoTela ([55,0])
 spawn fundoTela ([195,0])
 spawn fundoTela ([335,0])
 spawn fundoTela ([475,0])
-;;spawn fundoTela ([465,0])
-spawn tubo([0,120])
-spawn tubo([-100,120])
-spawn tubo([100,140])	
-spawn tubo([200,170])
-spawn tubo([300,120])
-spawn tubo([400,160])
-spawn tubo([500,160])
+
+val birds = tasks(1)
+spawn in birds, Bird([-225,0]) 
+val tubos = tasks(7)
+spawn in tubos, tubo([-100,120])
+spawn in tubos, tubo([0,120])
+spawn in tubos, tubo([100,140])	 
+spawn in tubos, tubo([200,170]) 
+spawn in tubos, tubo([300,120]) 
+spawn in tubos, tubo([400,160]) 
+spawn in tubos, tubo([500,160]) 
+
 spawn piso([-225,-170])
 spawn piso([-85,-170])
 spawn piso([55,-170])
 spawn piso([195,-170])
 spawn piso([335,-170])
 spawn piso([465,-170])
+
 pico-loop()
