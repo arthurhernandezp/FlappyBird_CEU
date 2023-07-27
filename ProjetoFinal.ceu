@@ -70,25 +70,7 @@ task fundoTela (pos:XY) {
 task Bird (pos:XY){
 	var dy = 0
 	var recorteY = 180;
-	
-	spawn{
-		par{
-			every :Pico.Key.Dn, (evt.key == :Key-up){
-				;;set pos.y = pos.y - 2
-		        if(pos.y < -140){
-					set pos.y = 0
-				}
-			}
-		}
-		with {
-            every :Pico.Key.Dn, (evt.key == :Key-W) {
-                set pos.y = pos.y + 2
-		        if(pos.y < -140){
-					set pos.y = 0
-				}
-            }
-        }
-	}
+
     par {
     	loop{
 			awaiting :Pico.Key.Up, (evt.key == :Key-W) {
